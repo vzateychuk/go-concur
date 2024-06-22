@@ -3,17 +3,15 @@ package main
 import (
 	"fmt"
 	"sync"
-
-	"vez/concur/model"
 )
 
 func main() {
 	fmt.Println("---> Start <----")
 
-	in := make(chan model.Meta)
+	in := make(chan Meta)
 	go func() {
 		for i := 0; i < 10; i++ {
-			meta := model.Meta{
+			meta := Meta{
 				Id: i,
 			}
 			in <- meta
@@ -28,10 +26,10 @@ func main() {
 	}
 }
 
-func processAsync(in chan model.Meta, processFn func(model.Meta) model.Meta, conc int) []model.Meta {
+func processAsync(in <-chan Meta, processFn func(Meta) Meta, conc int) []Meta {
 	var wg sync.WaitGroup
 	wg.Add(conc)
-	out := make(chan model.Meta, conc)
+	out := make(chan Meta, conc)
 	for i := 0; i < conc; i++ {
 		go func() {
 			defer wg.Done()
@@ -44,7 +42,7 @@ func processAsync(in chan model.Meta, processFn func(model.Meta) model.Meta, con
 		wg.Wait()
 		close(out)
 	}()
-	var results []model.Meta
+	var results []Meta
 	for v := range out {
 		results = append(results, v)
 	}
